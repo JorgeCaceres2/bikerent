@@ -12,27 +12,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-
 @RestController
 @RequestMapping("/api/bikes")
 public class BikeController {
 
-    @Autowired
-    private BikeService bikeService;
+  @Autowired
+  private BikeService bikeService;
 
 
-    private BikeMapper bikeMapper = new BikeMapper();
+  private BikeMapper bikeMapper = new BikeMapper();
 
-    @GetMapping
-    public List<BikeDto> findAll() {
-        return bikeService.getAllBikes().stream()
-                .map(b -> bikeMapper.fromBike(b))
-                .toList();
-    }
+  @GetMapping
+  public List<BikeDto> findAll() {
+    return bikeService.getAllBikes().stream()
+        .map(b -> bikeMapper.fromBike(b))
+        .toList();
+  }
 
     @GetMapping(value = "/{id}")
     public BikeDto findById(@PathVariable("id") int id) {
         return bikeMapper.fromBike(bikeService.getBikeDetails(id)
-                .orElseThrow(BikeNotFoundException::new));
+                .orElseThrow(() -> new BikeNotFoundException("Bike not found")));
     }
 }

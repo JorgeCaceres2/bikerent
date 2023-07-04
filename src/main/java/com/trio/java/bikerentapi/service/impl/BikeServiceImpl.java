@@ -22,4 +22,5 @@ public class BikeServiceImpl implements BikeService {
     public Optional<Bike> getBikeDetails(int id) {
         return bikeRepository.getBikeDetails(id);
     }
+
 }
