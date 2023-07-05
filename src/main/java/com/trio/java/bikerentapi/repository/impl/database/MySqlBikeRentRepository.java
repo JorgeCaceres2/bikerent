@@ -9,10 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface MySqlBikeRentRepository extends JpaRepository<BikeRent, Integer> {
 
-//  @Query("SELECT br FROM BikeRent br WHERE br.bike = :bike "
-//      + "AND br.startDate BETWEEN :startDate AND :endDate "
-//      + "AND br.endDate BETWEEN :startDate AND :endDate")
-
   @Query("SELECT br FROM BikeRent br WHERE br.bike = :bike "
       + "AND (br.startDate BETWEEN :startDate AND :endDate "
       + "OR br.endDate BETWEEN :startDate AND :endDate "

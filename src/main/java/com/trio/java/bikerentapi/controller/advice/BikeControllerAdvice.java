@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
-public class BikeRentControllerAdvice {
+public class BikeControllerAdvice {
 
   @ExceptionHandler({BikeNotFoundException.class, BikeRentException.class,
       InvalidDateException.class, UserNotFoundException.class})

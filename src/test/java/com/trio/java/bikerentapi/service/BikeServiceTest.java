@@ -13,9 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 
-
-
-
 @SpringBootTest
 @TestPropertySource(locations = "classpath:test-application.properties")
 class BikeServiceTest {
@@ -25,8 +22,6 @@ class BikeServiceTest {
 
     @Autowired
     private BikeService bikeService;
-
-
 
     @Test
     void shouldReturnEmptyListIfNoBikesAvailable() {

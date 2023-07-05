@@ -3,7 +3,7 @@ package com.trio.java.bikerentapi.service.impl;
 import com.trio.java.bikerentapi.config.RentConfig;
 import com.trio.java.bikerentapi.data.Bike;
 import com.trio.java.bikerentapi.data.BikeRent;
-import com.trio.java.bikerentapi.data.BikeRentDetails;
+import com.trio.java.bikerentapi.data.BikeRentPreview;
 import com.trio.java.bikerentapi.data.User;
 import com.trio.java.bikerentapi.dto.BikeRentRequestDto;
 import com.trio.java.bikerentapi.exception.BikeNotFoundException;
@@ -43,48 +43,65 @@ public class BikeRentServiceImpl implements BikeRentService {
 
 
   @Override
-  public BikeRentDetails getBikeRentDetails(int id, LocalDate startDate,
+  public BikeRentPreview getBikeRentPreview(int bikeId, LocalDate startDate,
       LocalDate endDate) {
+    log.info("About to get a bike rent for bike:{}", bikeId);
+    Bike bike = getBike(bikeId);
 
-    Bike bike = getBike(id);
     checkDates(startDate, endDate);
-    return createBikeRentDetails(startDate, endDate, bike);
+
+    return createBikeRentDetails(bike, startDate, endDate);
 
   }
 
   @Override
   public BikeRent saveBikeRent(BikeRentRequestDto bikeRentRequestDto) {
-    log.info("Attempting to save a new Bike Rent");
+    int bikeId = bikeRentRequestDto.getBikeId();
+    int userId = bikeRentRequestDto.getUserId();
+    LocalDate startDate = bikeRentRequestDto.getStartDate();
+    LocalDate endDate = bikeRentRequestDto.getEndDate();
 
-    checkBookedBikeRents(bikeRentRequestDto);
+    log.info("About to save a new bike rent for bike:{}, user:{}", bikeId, userId);
 
-    checkDates(bikeRentRequestDto.getStartDate(), bikeRentRequestDto.getEndDate());
+    checkDates(startDate, endDate);
 
-    User user = getUser(bikeRentRequestDto.getUserId());
+    User user = getUser(userId);
 
-    BikeRentDetails bikeRentDetails = getBikeRentDetails(bikeRentRequestDto.getBikeId(),
-        bikeRentRequestDto.getStartDate(), bikeRentRequestDto.getEndDate());
+    Bike bike = getBike(bikeId);
 
-    BikeRent bikeRent = bikeRentEntityMapper.fromBikeRentDetails(bikeRentDetails, user);
+    checkBookedBikeRents(bike, startDate, endDate);
+
+    BikeRentPreview bikeRentPreview = createBikeRentDetails(bike, startDate, endDate);
+
+    BikeRent bikeRent = bikeRentEntityMapper.fromBikeRentDetails(bikeRentPreview, user);
 
     return bikeRentRepository.saveBikeRent(bikeRent);
 
   }
 
   @Override
-  public List<BikeRent> getBookedBikeRentsByBike(int id, LocalDate startDate, LocalDate endDate) {
-    log.info("About to search booked rents for bikeId={}, startDate={}, "
-        + "endDate={}", id, startDate, endDate);
+  public List<BikeRent> getBikeBookedDates(int bikeId, LocalDate startDate,
+      LocalDate endDate) {
+    log.info("About to search booked rents for bikeId:{}, "
+        + "startDate:{}, endDate:{}", bikeId, startDate, endDate);
 
-    Bike bike = getBike(id);
     checkDates(startDate, endDate);
+
+    Bike bike = getBike(bikeId);
+
+    return getBikeRentByBike(bike, startDate, endDate);
+  }
+
+  private List<BikeRent> getBikeRentByBike(Bike bike, LocalDate startDate,
+      LocalDate endDate) {
     return bikeRentRepository.getBookedBikeRentsByBike(bike, startDate, endDate);
   }
 
-  private Bike getBike(int id) {
-    Optional<Bike> bike = bikeRepository.getBikeDetails(id);
+  private Bike getBike(int bikeId) {
+    log.info("Checking bike with Id:{}", bikeId);
+    Optional<Bike> bike = bikeRepository.getBikeDetails(bikeId);
     if (bike.isEmpty()) {
-      String errorMsg = String.format("Bike with Id = %s not found", id);
+      String errorMsg = String.format("Bike with Id=%s not found", bikeId);
       log.error(errorMsg);
       throw new BikeNotFoundException(errorMsg);
     }
@@ -92,6 +109,7 @@ public class BikeRentServiceImpl implements BikeRentService {
   }
 
   private User getUser(int userId) {
+    log.info("Checking user with Id:{}", userId);
     Optional<User> user = userRepository.getUserById(userId);
     if (user.isEmpty()) {
       String errorMsg = String.format("User with Id=%d not found", userId);
@@ -102,6 +120,7 @@ public class BikeRentServiceImpl implements BikeRentService {
   }
 
   private void checkDates(LocalDate startDate, LocalDate endDate) {
+    log.info("Checking dates. StartDate:{}, endDate:{}", startDate, endDate);
     if (startDate == null || endDate == null
         || startDate.isBefore(LocalDate.now()) || endDate.isBefore(startDate)) {
       String errorMsg = "Invalid dates provided";
@@ -110,24 +129,23 @@ public class BikeRentServiceImpl implements BikeRentService {
     }
   }
 
-  private void checkBookedBikeRents(BikeRentRequestDto bikeRentRequestDto) {
-    if (!getBookedBikeRentsByBike(bikeRentRequestDto.getBikeId(), bikeRentRequestDto.getStartDate(),
-        bikeRentRequestDto.getEndDate()).isEmpty()) {
+  private void checkBookedBikeRents(Bike bike, LocalDate startDate, LocalDate endDate) {
+    log.info("Checking bike rent availability for Bike:{}", bike.getId());
+    if (!getBikeRentByBike(bike, startDate, endDate).isEmpty()) {
       String errorMsg = "There are booked rents for the chosen dates";
       log.error(errorMsg.concat(". BikeId:{}, startDate: {}, EndDate: {}"),
-          bikeRentRequestDto.getBikeId(), bikeRentRequestDto.getStartDate(),
-          bikeRentRequestDto.getEndDate());
+          bike.getId(), startDate, endDate);
       throw new BikeRentException(errorMsg);
     }
   }
 
-  private BikeRentDetails createBikeRentDetails(LocalDate startDate, LocalDate endDate, Bike bike) {
+  private BikeRentPreview createBikeRentDetails(Bike bike, LocalDate startDate, LocalDate endDate) {
     long days = ChronoUnit.DAYS.between(startDate, endDate) + 1;
     double subTotal = bike.getRate() * days;
     double feeTotal = subTotal * rentConfig.getFee() / 100;
     double total = subTotal + feeTotal;
 
-    BikeRentDetails bikeRentDetails = BikeRentDetails.builder()
+    BikeRentPreview bikeRentPreview = BikeRentPreview.builder()
         .withBike(bike)
         .withStartDate(startDate)
         .withEndDate(endDate)
@@ -136,7 +154,7 @@ public class BikeRentServiceImpl implements BikeRentService {
         .withTotal(total)
         .build();
 
-    log.info("Returning Bike rent details: {}", bikeRentDetails);
-    return bikeRentDetails;
+    log.info("Returning Bike rent details: {}", bikeRentPreview);
+    return bikeRentPreview;
   }
 }

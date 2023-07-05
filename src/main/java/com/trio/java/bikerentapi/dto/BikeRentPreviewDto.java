@@ -1,29 +1,20 @@
-package com.trio.java.bikerentapi.data;
+package com.trio.java.bikerentapi.dto;
 
 import java.time.LocalDate;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(setterPrefix = "with")
-@ToString
-public class BikeRentDetails {
+public class BikeRentPreviewDto {
 
-  //TODO: is ok that this is not a DTO?
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "bike_id")
-  private Bike bike;
+  private BikeDto bikeDto;
   private LocalDate startDate;
   private LocalDate endDate;
   private double subTotal;

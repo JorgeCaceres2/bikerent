@@ -86,3 +86,7 @@ insert into bike_images(id, url, bike_id) values(60,'https://cremecycles.com/ima
 
 insert into users(id, first_name, last_name) values (1, 'Charles', 'Smith');
 insert into users(id, first_name, last_name) values (2, 'Brad', 'Jackson');
+
+insert into bike_rents (id, start_date, end_date, fee, sub_total, total, bike_id, user_id) values (100, CURRENT_DATE(), CURRENT_DATE() + INTERVAL '3' DAY, 14.55, 97.0, 111.55, 1, 1);
+--insert into bike_rents (id, start_date, end_date, fee, sub_total, total, bike_id, user_id) values (2,'2023-07-07',43.65,291.0,334.65,1,1);
+

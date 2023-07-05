@@ -2,9 +2,11 @@ package com.trio.java.bikerentapi.e2e;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,5 +51,27 @@ class IntegrationTests {
             get(String.format("/api/bikes/%s", id))
         )
         .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldReturnBookedDates() throws Exception {
+        int id = 1;
+        mockMvc.perform(get(String.format("/api/bikes/%s/booked-dates", id))
+                .param("start-date", LocalDate.now().toString())
+                .param("end-date", LocalDate.now().plusDays(6).toString()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.bikeDto.id", equalTo(id)))
+            .andExpect(jsonPath("$.dateRangeDtoList").isNotEmpty());
+    }
+
+    @Test
+    void shouldReturnEmptyBookedDates() throws Exception {
+        int id = 3;
+        mockMvc.perform(get(String.format("/api/bikes/%s/booked-dates", id))
+                .param("start-date", LocalDate.now().toString())
+                .param("end-date", LocalDate.now().plusDays(6).toString()))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.dateRangeDtoList").doesNotExist());
     }
 }

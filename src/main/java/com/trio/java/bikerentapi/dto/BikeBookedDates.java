@@ -1,6 +1,5 @@
 package com.trio.java.bikerentapi.dto;
 
-import com.trio.java.bikerentapi.data.Bike;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(setterPrefix = "with")
-public class BookedBikeRentDto {
+public class BikeBookedDates {
 
   private BikeDto bikeDto;
   private List<DateRangeDto> dateRangeDtoList;

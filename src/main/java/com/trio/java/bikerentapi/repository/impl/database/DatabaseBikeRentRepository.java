@@ -23,5 +23,4 @@ public class DatabaseBikeRentRepository implements BikeRentRepository {
     return db.save(bikeRent);
   }
 
-  //TODO: is this ok? Create a new repository for each entity?
 }

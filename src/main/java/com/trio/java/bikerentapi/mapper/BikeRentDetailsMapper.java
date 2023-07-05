@@ -1,22 +1,20 @@
 package com.trio.java.bikerentapi.mapper;
 
-import com.trio.java.bikerentapi.data.BikeRentDetails;
-import com.trio.java.bikerentapi.dto.BikeRentDetailsDto;
+import com.trio.java.bikerentapi.data.BikeRentPreview;
+import com.trio.java.bikerentapi.dto.BikeRentPreviewDto;
 
 public class BikeRentDetailsMapper {
 
-  //TOdO: mapper inside a mapper??
-
   private final BikeMapper bikeMapper = new BikeMapper();
 
-  public BikeRentDetailsDto fromBikeRentDetails(BikeRentDetails bikeRentDetails) {
-    return BikeRentDetailsDto.builder()
-        .withBikeDto(bikeMapper.fromBike(bikeRentDetails.getBike()))
-        .withStartDate(bikeRentDetails.getStartDate())
-        .withEndDate(bikeRentDetails.getEndDate())
-        .withSubTotal(bikeRentDetails.getSubTotal())
-        .withFee(bikeRentDetails.getFee())
-        .withTotal(bikeRentDetails.getTotal())
+  public BikeRentPreviewDto fromBikeRentPreview(BikeRentPreview bikeRentPreview) {
+    return BikeRentPreviewDto.builder()
+        .withBikeDto(bikeMapper.fromBike(bikeRentPreview.getBike()))
+        .withStartDate(bikeRentPreview.getStartDate())
+        .withEndDate(bikeRentPreview.getEndDate())
+        .withSubTotal(bikeRentPreview.getSubTotal())
+        .withFee(bikeRentPreview.getFee())
+        .withTotal(bikeRentPreview.getTotal())
         .build();
   }
 

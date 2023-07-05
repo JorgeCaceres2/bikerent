@@ -1,20 +1,25 @@
-package com.trio.java.bikerentapi.dto;
+package com.trio.java.bikerentapi.data;
 
 import java.time.LocalDate;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(setterPrefix = "with")
-public class BikeRentDetailsDto {
+@ToString
+public class BikeRentPreview {
 
-  private BikeDto bikeDto;
+  private Bike bike;
   private LocalDate startDate;
   private LocalDate endDate;
   private double subTotal;

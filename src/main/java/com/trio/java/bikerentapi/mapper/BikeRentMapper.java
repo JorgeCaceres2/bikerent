@@ -5,7 +5,6 @@ import com.trio.java.bikerentapi.dto.BikeRentDto;
 
 public class BikeRentMapper {
 
-  //TOdO: mapper inside a mapper??
   private final BikeMapper bikeMapper = new BikeMapper();
   private final UserMapper userMapper = new UserMapper();
 
