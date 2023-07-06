@@ -1,10 +1,10 @@
 package com.trio.java.bikerentapi.controller;
 
-import com.trio.java.bikerentapi.dto.BikeBookedDates;
 import com.trio.java.bikerentapi.dto.BikeDto;
+import com.trio.java.bikerentapi.dto.DateRangeDto;
 import com.trio.java.bikerentapi.exception.BikeNotFoundException;
-import com.trio.java.bikerentapi.mapper.BikeBookedDatesMapper;
 import com.trio.java.bikerentapi.mapper.BikeMapper;
+import com.trio.java.bikerentapi.mapper.DateRangeMapper;
 import com.trio.java.bikerentapi.service.BikeRentService;
 import com.trio.java.bikerentapi.service.BikeService;
 import java.time.LocalDate;
@@ -32,7 +32,7 @@ public class BikeController {
 
   private BikeMapper bikeMapper = new BikeMapper();
 
-  private BikeBookedDatesMapper bikeBookedDatesMapper = new BikeBookedDatesMapper();
+  private DateRangeMapper dateRangeMapper = new DateRangeMapper();
 
   @GetMapping
   public List<BikeDto> findAll() {
@@ -48,13 +48,13 @@ public class BikeController {
   }
 
   @GetMapping(value = "{id}/booked-dates")
-  public BikeBookedDates getBookedBikeRentDtoByBike(@PathVariable("id") int id,
+  public List<DateRangeDto> getBookedBikeRentDtoByBike(@PathVariable("id") int id,
       @RequestParam(value = "start-date")
       @NotNull @DateTimeFormat(iso = ISO.DATE) LocalDate startDate,
       @RequestParam(value = "end-date")
       @NotNull @DateTimeFormat(iso = ISO.DATE) LocalDate endDate) {
 
-    return bikeBookedDatesMapper.fromBikeRentList(bikeRentService
+    return dateRangeMapper.fromBikeRentList(bikeRentService
         .getBikeBookedDates(id, startDate, endDate));
   }
 }

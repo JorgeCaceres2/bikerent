@@ -15,12 +15,10 @@ import lombok.Setter;
 @Builder(setterPrefix = "with")
 public class BikeRentRequestDto {
 
-  //TODO: is it working?
-
   @NotNull(message = "UserId is required")
-  private int userId;
+  private Integer userId;
   @NotNull(message = "BikeId is required")
-  private int bikeId;
+  private Integer bikeId;
   @NotNull(message = "StartDate is required")
   private LocalDate startDate;
   @NotNull(message = "EndDate is required")

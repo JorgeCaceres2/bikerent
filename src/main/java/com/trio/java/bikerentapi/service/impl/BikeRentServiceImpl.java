@@ -10,7 +10,6 @@ import com.trio.java.bikerentapi.exception.BikeNotFoundException;
 import com.trio.java.bikerentapi.exception.BikeRentException;
 import com.trio.java.bikerentapi.exception.InvalidDateException;
 import com.trio.java.bikerentapi.exception.UserNotFoundException;
-import com.trio.java.bikerentapi.mapper.BikeRentEntityMapper;
 import com.trio.java.bikerentapi.repository.BikeRentRepository;
 import com.trio.java.bikerentapi.repository.BikeRepository;
 import com.trio.java.bikerentapi.repository.UserRepository;
@@ -39,19 +38,26 @@ public class BikeRentServiceImpl implements BikeRentService {
   @Autowired
   private UserRepository userRepository;
 
-  private final BikeRentEntityMapper bikeRentEntityMapper = new BikeRentEntityMapper();
-
-
   @Override
   public BikeRentPreview getBikeRentPreview(int bikeId, LocalDate startDate,
       LocalDate endDate) {
     log.info("About to get a bike rent for bike:{}", bikeId);
-    Bike bike = getBike(bikeId);
 
     checkDates(startDate, endDate);
 
-    return createBikeRentDetails(bike, startDate, endDate);
+    Bike bike = getBike(bikeId);
 
+    double subTotal = getSubTotal(startDate, endDate, bike.getRate());
+    double feeTotal = getFee(subTotal);
+    double total = getTotal(subTotal, feeTotal);
+    return BikeRentPreview.builder()
+        .withBike(bike)
+        .withStartDate(startDate)
+        .withEndDate(endDate)
+        .withFee(feeTotal)
+        .withSubTotal(subTotal)
+        .withTotal(total)
+        .build();
   }
 
   @Override
@@ -71,12 +77,20 @@ public class BikeRentServiceImpl implements BikeRentService {
 
     checkBookedBikeRents(bike, startDate, endDate);
 
-    BikeRentPreview bikeRentPreview = createBikeRentDetails(bike, startDate, endDate);
-
-    BikeRent bikeRent = bikeRentEntityMapper.fromBikeRentDetails(bikeRentPreview, user);
+    double subTotal = getSubTotal(startDate, endDate, bike.getRate());
+    double feeTotal = getFee(subTotal);
+    double total = getTotal(subTotal, feeTotal);
+    BikeRent bikeRent = BikeRent.builder()
+        .withUser(user)
+        .withBike(bike)
+        .withStartDate(startDate)
+        .withEndDate(endDate)
+        .withFee(feeTotal)
+        .withSubTotal(subTotal)
+        .withTotal(total)
+        .build();
 
     return bikeRentRepository.saveBikeRent(bikeRent);
-
   }
 
   @Override
@@ -101,8 +115,8 @@ public class BikeRentServiceImpl implements BikeRentService {
     log.info("Checking bike with Id:{}", bikeId);
     Optional<Bike> bike = bikeRepository.getBikeDetails(bikeId);
     if (bike.isEmpty()) {
-      String errorMsg = String.format("Bike with Id=%s not found", bikeId);
-      log.error(errorMsg);
+      String errorMsg = "Bike not found";
+      log.error(errorMsg.concat(". Id:{}"), bikeId);
       throw new BikeNotFoundException(errorMsg);
     }
     return bike.get();
@@ -112,8 +126,8 @@ public class BikeRentServiceImpl implements BikeRentService {
     log.info("Checking user with Id:{}", userId);
     Optional<User> user = userRepository.getUserById(userId);
     if (user.isEmpty()) {
-      String errorMsg = String.format("User with Id=%d not found", userId);
-      log.error(errorMsg);
+      String errorMsg = "User not found";
+      log.error(errorMsg.concat(". Id:{}"), userId);
       throw new UserNotFoundException(errorMsg);
     }
     return user.get();
@@ -133,28 +147,22 @@ public class BikeRentServiceImpl implements BikeRentService {
     log.info("Checking bike rent availability for Bike:{}", bike.getId());
     if (!getBikeRentByBike(bike, startDate, endDate).isEmpty()) {
       String errorMsg = "There are booked rents for the chosen dates";
-      log.error(errorMsg.concat(". BikeId:{}, startDate: {}, EndDate: {}"),
+      log.error(errorMsg.concat(". BikeId:{}, startDate:{}, EndDate:{}"),
           bike.getId(), startDate, endDate);
       throw new BikeRentException(errorMsg);
     }
   }
 
-  private BikeRentPreview createBikeRentDetails(Bike bike, LocalDate startDate, LocalDate endDate) {
+  private double getSubTotal(LocalDate startDate, LocalDate endDate, double rate) {
     long days = ChronoUnit.DAYS.between(startDate, endDate) + 1;
-    double subTotal = bike.getRate() * days;
-    double feeTotal = subTotal * rentConfig.getFee() / 100;
-    double total = subTotal + feeTotal;
+    return rate * days;
+  }
 
-    BikeRentPreview bikeRentPreview = BikeRentPreview.builder()
-        .withBike(bike)
-        .withStartDate(startDate)
-        .withEndDate(endDate)
-        .withFee(feeTotal)
-        .withSubTotal(subTotal)
-        .withTotal(total)
-        .build();
+  private double getFee(double subtotal) {
+    return subtotal * rentConfig.getFee() / 100;
+  }
 
-    log.info("Returning Bike rent details: {}", bikeRentPreview);
-    return bikeRentPreview;
+  private double getTotal(double subtotal, double fee) {
+    return subtotal + fee;
   }
 }

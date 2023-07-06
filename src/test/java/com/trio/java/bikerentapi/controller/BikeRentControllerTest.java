@@ -11,7 +11,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -60,7 +59,6 @@ class BikeRentControllerTest {
             .param("start-date", startDate.toString())
             .param("end-date", endDate.toString()))
         .andExpect(status().isOk())
-        .andDo(print())
         .andExpect(jsonPath("$.bikeDto.id", equalTo(bikeId)))
         .andExpect(jsonPath("$.total", equalTo(446.2)));
   }
@@ -70,14 +68,14 @@ class BikeRentControllerTest {
     LocalDate startDate = LocalDate.now();
     LocalDate endDate = startDate.plusDays(3);
     when(bikeRentService.getBikeRentPreview(anyInt(), any(), any()))
-        .thenThrow(new BikeNotFoundException("Bike with Id=1000 not found"));
+        .thenThrow(new BikeNotFoundException("Bike not found"));
 
     mockMvc.perform(get("/api/rents/preview")
             .param("bike-id", String.valueOf(bikeId))
             .param("start-date", startDate.toString())
             .param("end-date", endDate.toString()))
         .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$", equalTo("Bike with Id=1000 not found")));
+        .andExpect(jsonPath("$", equalTo("Bike not found")));
   }
 
   @Test
@@ -119,13 +117,13 @@ class BikeRentControllerTest {
     String request = getBikeRentRequestDtoToString();
 
     when(bikeRentService.saveBikeRent(any())).thenThrow(
-        new UserNotFoundException("User with Id=1000 not found"));
+        new UserNotFoundException("User not found"));
 
     mockMvc.perform(post("/api/rents")
             .contentType(MediaType.APPLICATION_JSON)
             .content(request))
         .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$", equalTo("User with Id=1000 not found")));
+        .andExpect(jsonPath("$", equalTo("User not found")));
   }
 
   @Test

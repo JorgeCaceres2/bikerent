@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.trio.java.bikerentapi.util.ObjectsFactory;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +68,7 @@ class BikeRentIntegrationTests {
             .contentType(MediaType.APPLICATION_JSON)
             .content(request))
         .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$", equalTo("Bike with Id=1000 not found")));
+        .andExpect(jsonPath("$", equalTo("Bike not found")));
   }
 
   @Test
@@ -83,7 +82,7 @@ class BikeRentIntegrationTests {
             .contentType(MediaType.APPLICATION_JSON)
             .content(request))
         .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$", equalTo("User with Id=1000 not found")));
+        .andExpect(jsonPath("$", equalTo("User not found")));
   }
 
   @Test
