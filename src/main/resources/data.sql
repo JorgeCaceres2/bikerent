@@ -1,5 +1,7 @@
+delete from bike_rents;
 delete from bike_images;
 delete from bikes;
+delete from users;
 
 insert into bikes(id, name, type, body_size, max_load, rate, description, ratings) values(1,'Monahan and Sons','Cruiser Bicycle',24,70,97,'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',4.6);
 insert into bike_images(id, url, bike_id) values(1,'https://cremecycles.com/images/glowne/16.jpg',1);
@@ -81,3 +83,9 @@ insert into bikes(id, name, type, body_size, max_load, rate, description, rating
 insert into bike_images(id, url, bike_id) values(58,'https://cremecycles.com/images/glowne/12.jpg',20);
 insert into bike_images(id, url, bike_id) values(59,'https://cremecycles.com/images/glowne/15.jpg',20);
 insert into bike_images(id, url, bike_id) values(60,'https://cremecycles.com/images/glowne/12.jpg',20);
+
+insert into users(id, first_name, last_name) values (1, 'Charles', 'Smith');
+insert into users(id, first_name, last_name) values (2, 'Brad', 'Jackson');
+
+insert into bike_rents (id, start_date, end_date, fee, sub_total, total, bike_id, user_id) values (100, CURRENT_DATE(), CURRENT_DATE() + INTERVAL '3' DAY, 14.55, 97.0, 111.55, 1, 1);
+

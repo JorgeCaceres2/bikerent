@@ -9,4 +9,5 @@ public interface BikeService {
     List<Bike> getAllBikes();
 
     Optional<Bike> getBikeDetails(int id);
+
 }
